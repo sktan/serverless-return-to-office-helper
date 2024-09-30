@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: ["arm64", "amd64"]
+        os: ["linux", "windows", "darwin"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '^1.22.0'
+      - if: ${{ matrix.os == 'windows' }}
+        name: Build windows-${{matrix.architecture}}
+        working-directory: ./cronhelper
+        run: CGO_ENABLED=0 GOOS=${{matrix.os}} GOARCH=${{matrix.architecture}} go build -ldflags '-extldflags "-static"' -tags timetzdata -o ../rto-helper-${{matrix.os}}-${{matrix.architecture}}.exe
+      - if: ${{ matrix.os != 'windows' }}
+        working-directory: ./cronhelper
+        name: Build ${{matrix.os}}-${{matrix.architecture}}
+        run: CGO_ENABLED=0 GOOS=${{matrix.os}} GOARCH=${{matrix.architecture}} go build -ldflags '-extldflags "-static"' -tags timetzdata -o ../rto-helper-${{matrix.os}}-${{matrix.architecture}}
+      - name: Github Release (Windows)
+        if: ${{ matrix.os == 'windows' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: rto-helper-${{matrix.os}}-${{matrix.architecture}}.exe
+      - name: Github Release (Others)
+        if: ${{ matrix.os != 'windows' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: rto-helper-${{matrix.os}}-${{matrix.architecture}}

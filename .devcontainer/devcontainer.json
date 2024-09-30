@@ -1,0 +1,36 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "eamodio.gitlens",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "EditorConfig.EditorConfig",
+        "vue.volar",
+        "GitHub.copilot",
+        "mutantdino.resourcemonitor"
+      ]
+    }
+  },
+  "features": {
+    // Used build and deploy docker containers
+    "ghcr.io/devcontainers/features/docker-in-docker:2": "latest",
+    "ghcr.io/devcontainers/features/aws-cli:1": "latest",
+    "ghcr.io/devcontainers/features/node:1": "lts",
+    "ghcr.io/devcontainers/features/go:1": "latest"
+  },
+  "forwardPorts": [
+    8080
+  ],
+  "mounts": [
+    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.aws/,target=/home/vscode/.aws,type=bind,consistency=cached"
+  ],
+  "remoteEnv": {
+    "AWS_PROFILE": "sktanapps"
+  },
+  "postCreateCommand": "npm install -g aws-cdk",
+  "postStartCommand": ".devcontainer/post_start.sh"
+}
